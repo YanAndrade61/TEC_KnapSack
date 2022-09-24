@@ -1,32 +1,34 @@
 import numpy as np
 import random
-from tqdm import tqdm
 
 class AGSimple:
 
-    def __init__(self,capacity: int, weights: list, profits: list, n_ind: int = 20, n_gen: int = 500, mutate_rate: float = 0.1):
+    def __init__(self,capacity: int, weights: list, profits: list, solution: list=[], n_ind: int = 20, n_gen: int = 500, mutate_rate: float = 0.1):
         self.capacity = capacity
         self.weights = weights
         self.profits = profits
         self.n_ind = n_ind
         self.n_gen = n_gen
         self.mutate_rate = mutate_rate
+        self.solution = solution
 
     def simulate(self) -> None:
         
         individuals = [np.random.choice(2, len(self.profits)) for i in range(self.n_ind)]
         
-        for i in tqdm(range(self.n_gen),position=0,leave=True):
+        for i in range(self.n_gen):
             fitness_lst = self.fitness(individuals)        
             parents = self.get_parents(fitness_lst)
-            inter_ind = self.cross(individuals,parents)
-            inter_ind = self.cross(individuals,parents)
+            new_ind = self.cross(individuals,parents)
+            new_ind = self.mutate(new_ind)
             maior = np.argmax(fitness_lst)
-            inter_ind[0] = individuals[maior]
-            individuals = np.array(inter_ind)
+            new_ind[0] = individuals[maior]
+            print(f"GEN: {i}, Fitness: {fitness_lst[maior]}, Best: {individuals[maior]}")
+            if np.array_equal(individuals[maior],self.solution):print("Solution has been reached!");break
+            individuals = np.array(new_ind)
+            
 
-        maior = np.argmax(fitness_lst)
-        print(fitness_lst[maior],individuals[maior])
+        return individuals[maior]
         
 
     def fitness(self, individuals : list) -> list:
