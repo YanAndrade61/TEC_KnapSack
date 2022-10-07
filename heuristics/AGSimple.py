@@ -1,9 +1,10 @@
 import numpy as np
 import random
 
+
 class AGSimple:
 
-    def __init__(self,capacity: int, weights: list, profits: list, solution: list=[], n_ind: int = 20, n_gen: int = 500, mutate_rate: float = 0.1):
+    def __init__(self,capacity: int, weights: list, profits: list, solution: list=[], n_ind: int = 20, n_gen: int = 500, mutate_rate: float = 0.1,i: int=0):
         self.capacity = capacity
         self.weights = weights
         self.profits = profits
@@ -11,23 +12,32 @@ class AGSimple:
         self.n_gen = n_gen
         self.mutate_rate = mutate_rate
         self.solution = solution
+        self.i = i
 
     def simulate(self) -> None:
         
         individuals = [np.random.choice(2, len(self.profits)) for i in range(self.n_ind)]
         
         for i in range(self.n_gen):
+
             fitness_lst = self.fitness(individuals)        
+            
             parents = self.get_parents(fitness_lst)
+            
             new_ind = self.cross(individuals,parents)
+            
+            
             new_ind = self.mutate(new_ind)
+            
             maior = np.argmax(fitness_lst)
+            
             new_ind[0] = individuals[maior]
-            print(f"GEN: {i}, Fitness: {fitness_lst[maior]}, Best: {individuals[maior]}")
-            if np.array_equal(individuals[maior],self.solution):print("Solution has been reached!");break
+            with open("results.txt","a") as f:
+                print(f"{self.n_gen}|{self.n_ind}|{self.mutate_rate},{self.i},{i},{fitness_lst[maior]}",file=f)
+            #if np.array_equal(individuals[maior],self.solution):print("Solution has been reached!");break
             individuals = np.array(new_ind)
             
-
+            
         return individuals[maior]
         
 
@@ -62,7 +72,7 @@ class AGSimple:
             a = parents[i]
             b = parents[i+1]
 
-            point = random.randint(1,self.n_ind-2)
+            point = random.randint(1,len(self.profits)-2)
             new_individuals.append(np.concatenate([individuals[a][:point], individuals[b][point:]]))
             new_individuals.append(np.concatenate([individuals[b][:point], individuals[a][point:]]))
         return new_individuals
